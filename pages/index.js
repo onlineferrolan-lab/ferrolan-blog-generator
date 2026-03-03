@@ -16,20 +16,14 @@ const TONOS = [
 
 const EJEMPLOS = [
   { tema: "Tendencias en pavimentos exteriores para 2026", categoria: "Espacios exteriores", keywords: "pavimento exterior, antideslizante, porcelánico, terraza" },
-  { tema: "Cómo elegir el mejor adhesivo para cerámica", categoria: "Consejos", keywords: "adhesivo cerámica, colas, colocación azulejos, C2 C1" },
-  { tema: "Cocinas de diseño nórdico: materiales y acabados", categoria: "Cocinas", keywords: "cocina nórdica, madera, blanco, encimera, diseño escandinavo" },
+  { tema: "Cómo elegir el mejor adhesivo para cerámica", categoria: "Consejos", keywords: "adhesivo cerámica, colas, colocación azulejos" },
+  { tema: "Cocinas de diseño nórdico: materiales y acabados", categoria: "Cocinas", keywords: "cocina nórdica, madera, blanco, encimera" },
 ];
 
 const C = {
-  red: "#E31E24",
-  redDark: "#B71C1C",
-  redLight: "#FFEBEE",
-  dark: "#2D2D2D",
-  mid: "#555555",
-  light: "#F5F5F5",
-  border: "#E0E0E0",
-  white: "#FFFFFF",
-  muted: "#888888",
+  red: "#E31E24", redDark: "#B71C1C", redLight: "#FFEBEE",
+  dark: "#2D2D2D", mid: "#555555", light: "#F5F5F5",
+  border: "#E0E0E0", white: "#FFFFFF", muted: "#888888",
 };
 
 function MarkdownRenderer({ content }) {
@@ -62,25 +56,13 @@ function MarkdownRenderer({ content }) {
   lines.forEach((line, i) => {
     if (line.startsWith("# ")) {
       flushList();
-      elements.push(
-        <h1 key={i} style={{ fontSize: "1.55rem", fontWeight: 700, color: C.dark, fontFamily: "'Oswald', sans-serif", lineHeight: 1.2, margin: "0 0 1rem", borderLeft: `4px solid ${C.red}`, paddingLeft: "0.85rem" }}>
-          {line.slice(2)}
-        </h1>
-      );
+      elements.push(<h1 key={i} style={{ fontSize: "1.55rem", fontWeight: 700, color: C.dark, fontFamily: "'Oswald', sans-serif", lineHeight: 1.2, margin: "0 0 1rem", borderLeft: `4px solid ${C.red}`, paddingLeft: "0.85rem" }}>{line.slice(2)}</h1>);
     } else if (line.startsWith("## ")) {
       flushList();
-      elements.push(
-        <h2 key={i} style={{ fontSize: "1.1rem", fontWeight: 700, color: C.dark, fontFamily: "'Oswald', sans-serif", margin: "1.8em 0 0.6em", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-          <span style={{ color: C.red, marginRight: "0.4rem" }}>▸</span>{line.slice(3)}
-        </h2>
-      );
+      elements.push(<h2 key={i} style={{ fontSize: "1.1rem", fontWeight: 700, color: C.dark, fontFamily: "'Oswald', sans-serif", margin: "1.8em 0 0.6em", textTransform: "uppercase", letterSpacing: "0.04em" }}><span style={{ color: C.red, marginRight: "0.4rem" }}>▸</span>{line.slice(3)}</h2>);
     } else if (line.startsWith("### ")) {
       flushList();
-      elements.push(
-        <h3 key={i} style={{ fontSize: "0.88rem", fontWeight: 700, color: C.mid, margin: "1.1em 0 0.35em", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-          {line.slice(4)}
-        </h3>
-      );
+      elements.push(<h3 key={i} style={{ fontSize: "0.88rem", fontWeight: 700, color: C.mid, margin: "1.1em 0 0.35em", textTransform: "uppercase", letterSpacing: "0.06em" }}>{line.slice(4)}</h3>);
     } else if (line.startsWith("- ")) {
       listItems.push(parseInline(line.slice(2)));
     } else if (line === "---") {
@@ -91,14 +73,77 @@ function MarkdownRenderer({ content }) {
       elements.push(<div key={i} style={{ height: "0.4em" }} />);
     } else {
       flushList();
-      elements.push(
-        <p key={i} style={{ lineHeight: 1.78, color: C.mid, margin: "0 0 0.75em", fontSize: "0.94rem" }}
-          dangerouslySetInnerHTML={{ __html: parseInline(line) }} />
-      );
+      elements.push(<p key={i} style={{ lineHeight: 1.78, color: C.mid, margin: "0 0 0.75em", fontSize: "0.94rem" }} dangerouslySetInnerHTML={{ __html: parseInline(line) }} />);
     }
   });
   flushList();
   return <div>{elements}</div>;
+}
+
+function ImagePanel({ imagenes, loadingImages, onGenerate, hasArticle }) {
+  if (!hasArticle) return null;
+
+  return (
+    <div style={{ marginTop: "1rem", background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.07)" }}>
+      <div style={{ background: C.dark, padding: "0.65rem 1.2rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span style={{ color: C.white, fontWeight: 700, fontSize: "0.82rem", fontFamily: "'Oswald', sans-serif", textTransform: "uppercase", letterSpacing: "0.07em" }}>Imágenes del artículo</span>
+        </div>
+        {!loadingImages && imagenes.length === 0 && (
+          <button onClick={onGenerate}
+            style={{ background: C.red, color: C.white, border: "none", borderRadius: 5, padding: "0.35rem 0.9rem", fontSize: "0.75rem", cursor: "pointer", fontFamily: "'Oswald', sans-serif", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}
+            onMouseOver={e => e.currentTarget.style.background = C.redDark}
+            onMouseOut={e => e.currentTarget.style.background = C.red}>
+            Generar imágenes
+          </button>
+        )}
+        {imagenes.length > 0 && (
+          <button onClick={onGenerate}
+            style={{ background: "#444", color: C.white, border: "none", borderRadius: 5, padding: "0.35rem 0.9rem", fontSize: "0.75rem", cursor: "pointer", fontFamily: "inherit", fontWeight: 600 }}>
+            ↺ Regenerar
+          </button>
+        )}
+      </div>
+
+      <div style={{ padding: "1.25rem" }}>
+        {loadingImages && (
+          <div style={{ textAlign: "center", padding: "2.5rem 1rem" }}>
+            <div style={{ width: 40, height: 40, border: `3px solid ${C.redLight}`, borderTopColor: C.red, borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto 1rem" }} />
+            <div style={{ color: C.dark, fontWeight: 700, fontFamily: "'Oswald', sans-serif", textTransform: "uppercase", fontSize: "0.85rem", marginBottom: "0.3rem" }}>Generando imágenes...</div>
+            <div style={{ color: C.muted, fontSize: "0.8rem" }}>Claude diseña los prompts · Gemini Imagen 3 las renderiza</div>
+          </div>
+        )}
+
+        {!loadingImages && imagenes.length === 0 && (
+          <div style={{ textAlign: "center", padding: "2rem 1rem", color: C.muted, fontSize: "0.85rem" }}>
+            Pulsa <strong style={{ color: C.red }}>Generar imágenes</strong> para crear las imágenes del artículo con IA
+          </div>
+        )}
+
+        {imagenes.length > 0 && (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+            {imagenes.map((img, i) => (
+              <div key={i}>
+                <div style={{ fontSize: "0.7rem", fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "0.4rem", fontFamily: "'Oswald', sans-serif" }}>
+                  {i === 0 ? "Imagen ambiente" : "Detalle de material"}
+                </div>
+                <img src={img.src} alt={img.descripcion}
+                  style={{ width: "100%", borderRadius: 6, display: "block", border: `1px solid ${C.border}` }} />
+                <div style={{ fontSize: "0.72rem", color: C.muted, marginTop: "0.4rem", lineHeight: 1.4, fontStyle: "italic" }}>
+                  {img.descripcion}
+                </div>
+                <a href={img.src} download={`ferrolan-imagen-${i + 1}.png`}
+                  style={{ display: "inline-block", marginTop: "0.5rem", fontSize: "0.73rem", color: C.red, fontWeight: 600, textDecoration: "none" }}>
+                  ↓ Descargar
+                </a>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default function Home() {
@@ -112,10 +157,13 @@ export default function Home() {
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState("preview");
+  const [imagenes, setImagenes] = useState([]);
+  const [loadingImages, setLoadingImages] = useState(false);
+  const [imageError, setImageError] = useState("");
 
   const generarArticulo = async () => {
     if (!tema || !categoria) { setError("Por favor, rellena el tema y la categoría."); return; }
-    setError(""); setLoading(true); setArticulo("");
+    setError(""); setLoading(true); setArticulo(""); setImagenes([]); setImageError("");
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
@@ -129,21 +177,30 @@ export default function Home() {
     setLoading(false);
   };
 
+  const generarImagenes = async () => {
+    if (!articulo) return;
+    setLoadingImages(true); setImagenes([]); setImageError("");
+    try {
+      const res = await fetch("/api/generate-images", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tema, categoria, articleText: articulo }),
+      });
+      const data = await res.json();
+      if (data.imagenes) setImagenes(data.imagenes);
+      else setImageError(data.error || "Error generando imágenes.");
+    } catch { setImageError("Error de conexión al generar imágenes."); }
+    setLoadingImages(false);
+  };
+
   const copiarMarkdown = () => {
     navigator.clipboard.writeText(articulo);
     setCopied(true);
     setTimeout(() => setCopied(false), 2200);
   };
 
-  const inputStyle = {
-    width: "100%", border: `1px solid ${C.border}`, borderRadius: 6,
-    padding: "0.62rem 0.8rem", fontSize: "0.88rem", outline: "none",
-    boxSizing: "border-box", fontFamily: "inherit", color: C.dark, background: C.white,
-  };
-  const labelStyle = {
-    fontSize: "0.72rem", fontWeight: 700, color: C.dark, display: "block",
-    marginBottom: "0.35rem", textTransform: "uppercase", letterSpacing: "0.05em",
-  };
+  const inputStyle = { width: "100%", border: `1px solid ${C.border}`, borderRadius: 6, padding: "0.62rem 0.8rem", fontSize: "0.88rem", outline: "none", boxSizing: "border-box", fontFamily: "inherit", color: C.dark, background: C.white };
+  const labelStyle = { fontSize: "0.72rem", fontWeight: 700, color: C.dark, display: "block", marginBottom: "0.35rem", textTransform: "uppercase", letterSpacing: "0.05em" };
 
   return (
     <>
@@ -166,7 +223,6 @@ export default function Home() {
         @media (max-width: 800px) { .main-grid { grid-template-columns: 1fr !important; } .form-sticky { position: relative !important; top: 0 !important; } }
       `}</style>
 
-      {/* HEADER */}
       <header style={{ background: C.white, borderBottom: `3px solid ${C.red}`, padding: "0 2rem", display: "flex", alignItems: "center", justifyContent: "space-between", height: 64, boxShadow: "0 2px 8px rgba(0,0,0,0.07)" }}>
         <img src="/logo-ferrolan.png" alt="Ferrolan" style={{ height: 40, objectFit: "contain" }} />
         <div style={{ display: "flex", alignItems: "center", gap: "0.55rem" }}>
@@ -175,14 +231,10 @@ export default function Home() {
         </div>
       </header>
 
-      {/* RED STRIPE */}
       <div style={{ background: C.red, padding: "0.5rem 2rem" }}>
-        <p style={{ color: "rgba(255,255,255,0.85)", fontSize: "0.75rem", fontFamily: "'Oswald', sans-serif", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-          Blog · Powered by Claude AI
-        </p>
+        <p style={{ color: "rgba(255,255,255,0.85)", fontSize: "0.75rem", fontFamily: "'Oswald', sans-serif", letterSpacing: "0.08em", textTransform: "uppercase" }}>Blog · Powered by Claude AI + Gemini Imagen 3</p>
       </div>
 
-      {/* MAIN */}
       <div className="main-grid" style={{ maxWidth: 1140, margin: "0 auto", padding: "1.75rem 1.5rem", display: "grid", gridTemplateColumns: "360px 1fr", gap: "1.5rem", alignItems: "start" }}>
 
         {/* FORM */}
@@ -194,8 +246,6 @@ export default function Home() {
             </div>
 
             <div style={{ padding: "1.2rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
-
-              {/* Ejemplos */}
               <div>
                 <div style={{ ...labelStyle, color: C.muted, marginBottom: "0.5rem" }}>Ejemplos rápidos</div>
                 {EJEMPLOS.map((ej, i) => (
@@ -250,19 +300,13 @@ export default function Home() {
                   style={{ ...inputStyle, resize: "vertical", lineHeight: 1.55 }} />
               </div>
 
-              {error && (
-                <div style={{ background: C.redLight, border: `1px solid #FFCDD2`, borderRadius: 5, padding: "0.55rem 0.75rem", color: C.redDark, fontSize: "0.82rem", fontWeight: 600 }}>
-                  ⚠ {error}
-                </div>
-              )}
+              {error && <div style={{ background: C.redLight, border: `1px solid #FFCDD2`, borderRadius: 5, padding: "0.55rem 0.75rem", color: C.redDark, fontSize: "0.82rem", fontWeight: 600 }}>⚠ {error}</div>}
 
               <button onClick={generarArticulo} disabled={loading}
                 style={{ background: loading ? C.redDark : C.red, color: C.white, border: "none", borderRadius: 6, padding: "0.9rem", fontWeight: 700, fontSize: "0.92rem", cursor: loading ? "not-allowed" : "pointer", fontFamily: "'Oswald', sans-serif", letterSpacing: "0.07em", textTransform: "uppercase", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}
                 onMouseOver={e => !loading && (e.currentTarget.style.background = C.redDark)}
                 onMouseOut={e => !loading && (e.currentTarget.style.background = C.red)}>
-                {loading
-                  ? <><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" style={{ animation: "spin 0.85s linear infinite" }}><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg> Generando...</>
-                  : "Generar artículo"}
+                {loading ? <><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" style={{ animation: "spin 0.85s linear infinite" }}><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg> Generando...</> : "Generar artículo"}
               </button>
             </div>
           </div>
@@ -270,7 +314,7 @@ export default function Home() {
           <div style={{ marginTop: "0.85rem", background: C.white, border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.red}`, borderRadius: "0 6px 6px 0", padding: "0.75rem 1rem" }}>
             <div style={{ fontSize: "0.7rem", color: C.dark, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", fontFamily: "'Oswald', sans-serif", marginBottom: "0.3rem" }}>Cada artículo incluye</div>
             <div style={{ fontSize: "0.75rem", color: C.mid, lineHeight: 1.65 }}>
-              Tono informativo sin presión comercial · Estructura editorial · Links internos · CTA de servicio · Meta SEO · Slug y etiquetas
+              Tono informativo · Estructura editorial · Links internos · Meta SEO · 2 imágenes IA adaptadas al tema
             </div>
           </div>
         </div>
@@ -296,39 +340,55 @@ export default function Home() {
           )}
 
           {articulo && (
-            <div className="articulo-panel" style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.07)" }}>
-              <div style={{ background: C.dark, padding: "0.65rem 1.2rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <div style={{ display: "flex", gap: "0.2rem" }}>
-                  {[["preview", "Vista previa"], ["markdown", "Markdown"]].map(([val, label]) => (
-                    <button key={val} onClick={() => setActiveTab(val)}
-                      style={{ padding: "0.3rem 0.85rem", borderRadius: 4, border: "none", background: activeTab === val ? C.red : "transparent", color: activeTab === val ? C.white : "#AAAAAA", fontSize: "0.75rem", cursor: "pointer", fontFamily: "'Oswald', sans-serif", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                      {label}
-                    </button>
-                  ))}
+            <div className="articulo-panel">
+              {/* Artículo */}
+              <div style={{ background: C.white, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.07)" }}>
+                <div style={{ background: C.dark, padding: "0.65rem 1.2rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", gap: "0.2rem" }}>
+                    {[["preview", "Vista previa"], ["markdown", "Markdown"]].map(([val, label]) => (
+                      <button key={val} onClick={() => setActiveTab(val)}
+                        style={{ padding: "0.3rem 0.85rem", borderRadius: 4, border: "none", background: activeTab === val ? C.red : "transparent", color: activeTab === val ? C.white : "#AAAAAA", fontSize: "0.75rem", cursor: "pointer", fontFamily: "'Oswald', sans-serif", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  <button onClick={copiarMarkdown}
+                    style={{ background: copied ? "#16a34a" : "#444", color: C.white, border: "none", borderRadius: 5, padding: "0.36rem 0.9rem", fontSize: "0.75rem", cursor: "pointer", fontFamily: "inherit", fontWeight: 700 }}>
+                    {copied ? "✓ Copiado!" : "⎘ Copiar Markdown"}
+                  </button>
                 </div>
-                <button onClick={copiarMarkdown}
-                  style={{ background: copied ? "#16a34a" : "#444", color: C.white, border: "none", borderRadius: 5, padding: "0.36rem 0.9rem", fontSize: "0.75rem", cursor: "pointer", fontFamily: "inherit", fontWeight: 700 }}>
-                  {copied ? "✓ Copiado!" : "⎘ Copiar Markdown"}
-                </button>
+
+                <div style={{ padding: "2rem 2.5rem", maxHeight: "65vh", overflowY: "auto" }}>
+                  {activeTab === "preview"
+                    ? <MarkdownRenderer content={articulo} />
+                    : <pre style={{ fontFamily: "monospace", fontSize: "0.82rem", lineHeight: 1.7, color: C.mid, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{articulo}</pre>
+                  }
+                </div>
+
+                <div style={{ borderTop: `1px solid ${C.light}`, padding: "0.85rem 1.5rem", display: "flex", alignItems: "center", gap: "0.75rem", background: C.light }}>
+                  <button onClick={generarArticulo}
+                    style={{ background: C.dark, color: C.white, border: "none", borderRadius: 5, padding: "0.5rem 1.1rem", fontSize: "0.78rem", cursor: "pointer", fontFamily: "'Oswald', sans-serif", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}
+                    onMouseOver={e => e.currentTarget.style.background = C.red}
+                    onMouseOut={e => e.currentTarget.style.background = C.dark}>
+                    ↺ Regenerar
+                  </button>
+                  <span style={{ flex: 1 }} />
+                  <span style={{ fontSize: "0.72rem", color: C.muted }}>Listo para revisar y publicar en WordPress</span>
+                </div>
               </div>
 
-              <div style={{ padding: "2rem 2.5rem", maxHeight: "70vh", overflowY: "auto" }}>
-                {activeTab === "preview"
-                  ? <MarkdownRenderer content={articulo} />
-                  : <pre style={{ fontFamily: "monospace", fontSize: "0.82rem", lineHeight: 1.7, color: C.mid, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{articulo}</pre>
-                }
-              </div>
-
-              <div style={{ borderTop: `1px solid ${C.light}`, padding: "0.85rem 1.5rem", display: "flex", alignItems: "center", gap: "0.75rem", background: C.light }}>
-                <button onClick={generarArticulo}
-                  style={{ background: C.dark, color: C.white, border: "none", borderRadius: 5, padding: "0.5rem 1.1rem", fontSize: "0.78rem", cursor: "pointer", fontFamily: "'Oswald', sans-serif", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}
-                  onMouseOver={e => e.currentTarget.style.background = C.red}
-                  onMouseOut={e => e.currentTarget.style.background = C.dark}>
-                  ↺ Regenerar
-                </button>
-                <span style={{ flex: 1 }} />
-                <span style={{ fontSize: "0.72rem", color: C.muted }}>Listo para revisar y publicar en WordPress</span>
-              </div>
+              {/* Imágenes */}
+              {imageError && (
+                <div style={{ marginTop: "0.75rem", background: C.redLight, border: `1px solid #FFCDD2`, borderRadius: 6, padding: "0.6rem 1rem", color: C.redDark, fontSize: "0.82rem", fontWeight: 600 }}>
+                  ⚠ {imageError}
+                </div>
+              )}
+              <ImagePanel
+                imagenes={imagenes}
+                loadingImages={loadingImages}
+                onGenerate={generarImagenes}
+                hasArticle={!!articulo}
+              />
             </div>
           )}
         </div>
