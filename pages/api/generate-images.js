@@ -24,11 +24,11 @@ Responde ÚNICAMENTE con un JSON válido, sin texto adicional, sin markdown, sin
 {
   "imagen1": {
     "descripcion": "para qué es esta imagen",
-    "prompt": "el prompt completo en inglés para Imagen 3"
+    "prompt": "el prompt completo en inglés"
   },
   "imagen2": {
-    "descripcion": "para qué es esta imagen",  
-    "prompt": "el prompt completo en inglés para Imagen 3"
+    "descripcion": "para qué es esta imagen",
+    "prompt": "el prompt completo en inglés"
   }
 }`;
 
@@ -53,7 +53,7 @@ Los prompts deben estar en inglés y ser muy específicos y descriptivos.`;
   });
 
   const raw = message.content[0]?.text || "{}";
-  
+
   try {
     const cleaned = raw.replace(/```json|```/g, "").trim();
     return JSON.parse(cleaned);
@@ -63,20 +63,15 @@ Los prompts deben estar en inglés y ser muy específicos y descriptivos.`;
   }
 }
 
-// ─── Llama a Gemini Imagen 3 ─────────────────────────────────────────────────
+// ─── Llama a Gemini 2.0 Flash Image (tier gratuito) ──────────────────────────
 
 async function generateImageWithGemini(prompt) {
   const apiKey = process.env.GEMINI_API_KEY;
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${apiKey}`;
 
   const body = {
-    instances: [{ prompt }],
-    parameters: {
-      sampleCount: 1,
-      aspectRatio: "16:9",
-      safetyFilterLevel: "block_few",
-      personGeneration: "allow_adult",
-    },
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
   };
 
   const res = await fetch(url, {
@@ -91,10 +86,18 @@ async function generateImageWithGemini(prompt) {
   }
 
   const data = await res.json();
-  const base64 = data?.predictions?.[0]?.bytesBase64Encoded;
-  if (!base64) throw new Error("No image returned from Gemini");
 
-  return `data:image/png;base64,${base64}`;
+  // Buscar la parte de imagen en la respuesta
+  const parts = data?.candidates?.[0]?.content?.parts || [];
+  const imagePart = parts.find((p) => p.inlineData?.mimeType?.startsWith("image/"));
+
+  if (!imagePart) {
+    throw new Error("No image returned from Gemini");
+  }
+
+  const mimeType = imagePart.inlineData.mimeType;
+  const base64 = imagePart.inlineData.data;
+  return `data:${mimeType};base64,${base64}`;
 }
 
 // ─── Handler ─────────────────────────────────────────────────────────────────
@@ -138,7 +141,6 @@ export default async function handler(req, res) {
         { src: img2, descripcion: prompts.imagen2.descripcion, prompt: prompts.imagen2.prompt },
       ],
     });
-
   } catch (err) {
     console.error("Image generation error:", err);
     return res.status(500).json({ error: err.message || "Error generando imágenes" });
