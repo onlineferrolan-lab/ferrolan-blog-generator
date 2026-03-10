@@ -55,7 +55,6 @@ Los prompts deben estar en inglés y ser muy específicos y descriptivos.`;
   const raw = message.content[0]?.text || "{}";
   
   try {
-    // Limpia posibles backticks o prefijos json
     const cleaned = raw.replace(/```json|```/g, "").trim();
     return JSON.parse(cleaned);
   } catch {
@@ -68,7 +67,7 @@ Los prompts deben estar en inglés y ser muy específicos y descriptivos.`;
 
 async function generateImageWithGemini(prompt) {
   const apiKey = process.env.GEMINI_API_KEY;
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1/models/imagen-3.0-generate-001:predict?key=${apiKey}`;
 
   const body = {
     instances: [{ prompt }],
